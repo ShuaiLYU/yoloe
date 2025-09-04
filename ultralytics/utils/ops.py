@@ -381,7 +381,10 @@ def scale_image(masks, im0_shape, ratio_pad=None):
     if len(masks.shape) < 2:
         raise ValueError(f'"len of masks shape" should be 2 or 3, but got {len(masks.shape)}')
     masks = masks[top:bottom, left:right]
-    masks = cv2.resize(masks, (im0_shape[1], im0_shape[0]))
+    masks = [cv2.resize(array, (im0_shape[1], im0_shape[0])) for array in np.array_split(masks, masks.shape[-1] // 512 + 1, axis=-1)]
+    masks = np.concatenate(masks, axis=-1) if len(masks) > 1 else masks[0]
+
+
     if len(masks.shape) == 2:
         masks = masks[:, :, None]
 
